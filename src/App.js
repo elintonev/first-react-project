@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import axios from "axios";
 
 import People from "./Assets/PeopleTalking.svg";
 import Arrow from "./Assets/Arrow.svg";
@@ -17,18 +18,30 @@ import {
 
 function App() {
   const [users, setUsers] = useState([]);
+  const inputName = useRef();
+  const inputAge = useRef();
 
-  function addNewUser() {
-    setUsers([{ id: Math.random, name: "Elinton", age: 27 }]);
+  async function addNewUser() {
+    const { data } = await axios.post("http://localhost:3001/users", {
+      name: inputName.current.value,
+      age: inputAge.current.value,
+    });
+    console.log(data);
+    setUsers([...users, data]);
   }
 
+  function deletUsers(userid) {
+    const newUsers = users.filter((user) => user.id !== userid);
+    setUsers(newUsers);
+  }
   return (
     <Container>
       <Image alt="people-talking" src={People} />
       <ContainerItens>
         <H1> Olá </H1> <InputLabel> Nome </InputLabel>
-        <Input placeholder="Nome " />
-        <InputLabel> Idade </InputLabel> <Input placeholder="Idade " />
+        <Input ref={inputName} placeholder="Nome " />
+        <InputLabel> Idade </InputLabel>
+        <Input ref={inputAge} placeholder="Idade " />
         <Button onClick={addNewUser}>
           Cadastrar <img alt="seta" src={Arrow} />
         </Button>
@@ -36,7 +49,7 @@ function App() {
           {users.map((user) => (
             <User key={user.id}>
               <p>{user.name}</p> <p>{user.age}</p>
-              <button>
+              <button onClick={() => deletUsers(user.id)}>
                 <img alt="Lixeira" src={Trash} />
               </button>
             </User>
